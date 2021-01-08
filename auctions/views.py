@@ -10,6 +10,7 @@ from .models import User, AuctionListing, Bid, Comment, Category
 
 
 def index(request):
+    #
     #print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     return render(request, "auctions/index.html")
 
