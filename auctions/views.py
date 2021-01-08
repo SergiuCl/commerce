@@ -10,9 +10,17 @@ from .models import User, AuctionListing, Bid, Comment, Category
 
 
 def index(request):
-    #
-    #print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    return render(request, "auctions/index.html")
+
+    return render(request, "auctions/index.html", {
+        "listings": AuctionListing.objects.all()
+    })
+
+
+def listing(request, listing_id):
+    item = AuctionListing.objects.get(pk=listing_id)
+    return render(request, "auctions/listing.html", {
+        "listing": item
+    })
 
 
 @login_required(login_url="login")

@@ -4,38 +4,55 @@
 <html lang="en">
 <head>
     <title>{% block title %}Auctions{% endblock %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
-<body>
-<h1>Auctions</h1>
-<div>
-    {% if user.is_authenticated %}
-    Signed in as <strong>{{ user.username }}</strong>.
-    {% else %}
-    Not signed in.
-    {% endif %}
+
+<div class="jumbotron">
+    <div class="container text-center">
+        <h2>Auctions</h2>
+        <div>
+            {% if user.is_authenticated %}
+            Signed in as <strong>{{ user.username }}</strong>.
+            {% else %}
+            Not signed in.
+            {% endif %}
+        </div>
+    </div>
 </div>
-<ul class="nav">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-    </li>
-    <li>
-        <a class="nav-link" href="{% url 'createListing' %}">Create Listings</a>
-    </li>
-    {% if user.is_authenticated %}
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-    </li>
-    {% else %}
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'login' %}">Log In</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'register' %}">Register</a>
-    </li>
-    {% endif %}
-</ul>
+{% block head %}
+{% endblock %}
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="{% url 'index' %}">Active Listings</a></li>
+                <li><a href="{% url 'createListing' %}">Create Listings</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Log Out</a></li>
+                {% else %}
+                <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-user"></span> Log In</a></li>
+                <li><a href="{% url 'register' %}">Register</a></li>
+                <li><a href="#"><span class="glyphicon glyphicon-shopping-cart"></span> Cart</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <hr>
 {% block body %}
 {% endblock %}
