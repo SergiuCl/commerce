@@ -1,14 +1,59 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+import datetime
 
-from .models import User
+from .models import User, AuctionListing, Bid, Comment, Category
 
 
 def index(request):
+    #print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     return render(request, "auctions/index.html")
+
+
+@login_required(login_url="login")
+def create_listing(request):
+    if request.method == "POST":
+
+        # get the info from user
+        auction_title = request.POST["title"]
+        auction_price = float(request.POST["price"])
+
+        # make sure values are entered
+        if not auction_title:
+            return render(request, "auctions/createListing.html", {
+                "message": "Please provide a title."
+            })
+        elif not auction_price:
+            return render(request, "auctions/createListing.html", {
+                "message": "Please provide a price."
+            })
+
+        # create a new object of type AuctionListing
+        auction = AuctionListing()
+        # add data to object
+        auction.owner = request.user
+        auction.title = auction_title
+        auction.description = request.POST["description"]
+        auction.price = auction_price
+
+        if request.POST["image"]:
+            auction.image_link = request.POST["image"]
+        else:
+            auction.image_link = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/No_image_3x4.svg/1200px-No_image_3x4.svg.png"
+
+        auction.categories = Category.objects.get(pk=int(request.POST["categories"]))
+
+        auction.last_update = datetime.datetime.now()
+        auction.save()
+        return HttpResponseRedirect(reverse('index'))
+
+    return render(request, "auctions/createListing.html", {
+        "categories": Category.objects.all()
+    })
 
 
 def login_view(request):
