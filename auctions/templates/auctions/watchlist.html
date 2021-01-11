@@ -1,0 +1,44 @@
+{% extends "auctions/layout.html" %}
+{% block head %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+{% endblock %}
+
+
+{% block body %}
+{% if message %}
+<div>{{ message }}</div>
+{% endif %}
+
+<div class="container">
+    <div class="row">
+        {% for item in watchlist_items %}
+        <div class="col-sm-4 col-md-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <a href="{% url 'listing' item.id %}" style="color: white">{{ item.title }}</a>
+                </div>
+                <div class="panel-body">
+                    <a href="{% url 'listing' item.id %}">
+                        <img src="{{ item.image_link }}" class="img-responsive" style="width:100%" alt="{{ item.title }}">
+                    </a>
+                </div>
+                <div class="panel-footer">
+                    <strong>Price:</strong> $ {{ item.price }}
+                </div>
+                <div class="panel-footer">
+                    <strong>Created </strong>{{ item.orig_date }}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <ul>
+                <li>No items in your watchlist</li>
+            </ul>
+        {% endfor %}
+    </div>
+</div><br>
+
+{% endblock %}

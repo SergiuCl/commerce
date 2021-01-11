@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/7fe15bd877.js" crossorigin="anonymous"></script>
 </head>
 
 <div class="jumbotron">
@@ -38,7 +39,10 @@
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="{% url 'index' %}">Active Listings</a></li>
+                {% if user.is_authenticated %}
                 <li><a href="{% url 'createListing' %}">Create Listings</a></li>
+                <li><a href="{% url 'watchlist' %}">Watchlist</a></li>
+                {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}

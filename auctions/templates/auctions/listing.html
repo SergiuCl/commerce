@@ -1,3 +1,80 @@
 {% extends "auctions/layout.html" %}
 
-<h1>{{ listing.title }}</h1>
+
+{% block body %}
+{% if message %}
+    <div>
+        <ul>
+            <li>{{ message }}</li>
+        </ul>
+    </div>
+{% endif %}
+
+<div>
+    <h1>{{ listing.title }}</h1>
+    <img src="{{ listing.image_url }}" alt="{{ listing.title }}">
+    <br> <br>
+    <p>Starting price: <strong>${{ listing.price }}</strong></p>
+</div>
+
+<div>
+<h3>Details</h3>
+<ul>
+    <li>Listed by: <strong>{{ listing.owner }}</strong></li>
+    <li>Category: <strong>{{ listing.categories }}</strong></li>
+    <li>Last update: <strong>{{ listing.last_update }}</strong></li>
+</ul>
+</div>
+
+{% if in_watchlist %}
+    <a href="{% url 'removeFromWatchlist' listing.id %}">
+        <button type="submit" class="btn btn-outline-secondary">
+            <i class="fas fa-star"> Remove Item from Watchlist</i>
+        </button>
+    </a>
+{% else %}
+    <a href="{% url 'addToWatchlist' listing.id %}">
+        <button type="submit" class="btn btn-outline-secondary">
+            <i class="far fa-star"> Add Item to Watchlist</i>
+        </button>
+    </a>
+{% endif %}
+<br/>
+<br>
+
+{% if other_bids %}
+    <p><strong>{{ number_of_bids }}</strong> bid(s) so far.</p>
+    <p>Current bid: <strong>${{ current_bid }}</strong></p>
+{% else %}
+    <p>No bids so far.</p>
+{% endif %}
+
+{% if user_has_max %}
+    <p>Your bid is now the current bid. Good luck!</p>
+{% endif %}
+
+<form action="{% url 'listing' listing.id %}" method="post">
+    {% csrf_token %}
+    {% if user_is_owner %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="placeBid" placeholder="Bid" disabled>
+        </div>
+        <input class="btn btn-primary" type="submit" value="Place Bid" disabled>
+    {% else %}
+        <div class="form-group">
+            <input autofocus class="form-control" type="text" name="placeBid" placeholder="Bid">
+        </div>
+        <input class="btn btn-primary" type="submit" value="Place Bid">
+    {% endif %}
+
+</form>
+<br>
+
+{% if user_is_owner %}
+<a href="{% url 'closeAuction' listing.id %}">
+    <button type="button" class="btn btn-warning">Close Auction</button>
+</a>
+{% endif %}
+
+{% endblock %}
+
