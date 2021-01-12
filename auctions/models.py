@@ -49,4 +49,8 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    comment = models.CharField(max_length=60)
+    user_id = models.IntegerField(null=True)
+    username = models.CharField(max_length=30, default=None)
+    listing_id = models.IntegerField(null=True)
+    comment = models.CharField(max_length=100, default=None)
+    date = models.DateTimeField(auto_now_add=True)

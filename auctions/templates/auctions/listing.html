@@ -64,17 +64,35 @@
         <div class="form-group">
             <input autofocus class="form-control" type="text" name="placeBid" placeholder="Bid">
         </div>
-        <input class="btn btn-primary" type="submit" value="Place Bid">
+        <input class="btn btn-primary" type="submit" value="Place Bid" name="place">
     {% endif %}
-
 </form>
-<br>
-
+<hr>
 {% if user_is_owner %}
 <a href="{% url 'closeAuction' listing.id %}">
     <button type="button" class="btn btn-warning">Close Auction</button>
 </a>
 {% endif %}
+<hr>
+<form action="{% url 'comment' listing.id %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <textarea class="form-control" name="comment" id="words" cols="30" rows="10" placeholder="Comment" style="height: 100px;"></textarea>
+    </div>
+    <input class="btn btn-primary" type="submit" value="Comment">
+</form>
+<hr>
+
+{% for comment in comments %}
+    <h3>User: {{ comment.username }}</h3>
+    <p>Comment: {{ comment.comment }}</p>
+    <p>Date: {{ comment.date }}</p>
+<hr>
+{% empty %}
+<ul>
+    <li>No comments yet</li>
+</ul>
+{% endfor %}
 
 {% endblock %}
 

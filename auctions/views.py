@@ -23,9 +23,18 @@ def index(request):
 
 
 def closed_auctions(request):
-
-    return render(request, "auctions/index.html", {
+    # display all the closed auctions
+    return render(request, "auctions/closedAuctions.html", {
         "listings": ClosedAuctions.objects.all()
+    })
+
+
+@login_required(login_url="login")
+def user_winnings(request):
+    # display all the closed auctions for the current user
+    current_user = request.user
+    return render(request, "auctions/myWinnings.html", {
+        "listings": ClosedAuctions.objects.filter(winner_id=current_user.id)
     })
 
 
@@ -36,8 +45,8 @@ def listing(request, listing_id):
     number_of_bids = 0
     user_has_max = False
     user_is_owner = False
-
-# insert the info from form into the db
+    listing_comments = []
+    # insert the info from form into the db
     if request.method == "POST":
         global auction_winner
         item = AuctionListing.objects.get(pk=listing_id)
@@ -81,6 +90,9 @@ def listing(request, listing_id):
             user_is_owner = True
         other_users_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
 
+        # get the comments for the current listing
+        listing_comments = Comment.objects.filter(listing_id=listing_id)
+
         return render(request, "auctions/listing.html", {
             "listing": item,
             "in_watchlist": in_watchlist,
@@ -90,7 +102,8 @@ def listing(request, listing_id):
             "number_of_bids": number_of_bids['count'],
             "user_has_max": user_has_max,
             "user_is_owner": user_is_owner,
-            "current_bid": other_users_bid['bid__max']
+            "current_bid": other_users_bid['bid__max'],
+            "comments": listing_comments
         })
     else:
         # if method is get
@@ -111,6 +124,9 @@ def listing(request, listing_id):
         # check if user owns the auction
         if item.owner == current_user:
             user_is_owner = True
+        # get the comments for the current listing
+        listing_comments = Comment.objects.filter(listing_id=listing_id)
+
         return render(request, "auctions/listing.html", {
             "listing": item,
             "in_watchlist": in_watchlist,
@@ -118,8 +134,23 @@ def listing(request, listing_id):
             "number_of_bids": number_of_bids['count'],
             "user_has_max": user_has_max,
             "user_is_owner": user_is_owner,
-            "current_bid": other_users_bid['bid__max']
+            "current_bid": other_users_bid['bid__max'],
+            "comments": listing_comments
         })
+
+
+def comment(request, listing_id):
+
+    user_comment = None
+    current_user = request.user
+    # check if any comments and save them in the db
+    if request.POST["comment"]:
+        user_comment = request.POST["comment"]
+        print(user_comment)
+        new_comment = Comment(user_id=current_user.id, username=current_user.username,
+                              listing_id=listing_id, comment=user_comment)
+        new_comment.save()
+        return HttpResponseRedirect(reverse('listing', args=(listing_id,)))
 
 
 @login_required(login_url="login")
@@ -155,7 +186,7 @@ def close_auction(request, listing_id):
     item = AuctionListing.objects.get(pk=listing_id)
     winning_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
     current_user = request.user
-    # nu merge pt ca eu cand dau close sunt current user si trebuie sa vad cine a licitat maxim
+
     closed_item = ClosedAuctions(winner_id=auction_winner.id, listing_title=item.title,
                                  winner_username=auction_winner.username, winning_price=winning_bid['bid__max'],
                                  image_link=item.image_link)
@@ -163,6 +194,7 @@ def close_auction(request, listing_id):
     AuctionListing.objects.filter(pk=listing_id).delete()
     Bid.objects.filter(listing_id=listing_id).delete()
     Watchlist.objects.filter(listing_id=listing_id).delete()
+    Comment.objects.filter(listing_id=listing_id).delete()
     return HttpResponseRedirect(reverse('index'))
 
 
@@ -224,6 +256,30 @@ def create_listing(request):
 
     return render(request, "auctions/createListing.html", {
         "categories": Category.objects.all()
+    })
+
+
+def categories(request):
+
+    if request.method == "POST":
+        if request.POST['category']:
+            print(request.POST['category'])
+            selected_category = Category.objects.get(category=request.POST['category'])
+            print(selected_category)
+            category_items = AuctionListing.objects.filter(categories=selected_category)
+
+        categories_list = Category.objects.all()
+
+        return render(request, "auctions/categories.html", {
+            "categories": categories_list,
+            "listings": category_items,
+            "selected_category": selected_category
+        })
+
+    categories_list = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": categories_list,
+        "items": ""
     })
 
 

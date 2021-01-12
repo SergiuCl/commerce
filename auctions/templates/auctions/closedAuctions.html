@@ -21,24 +21,27 @@
         <div class="col-sm-4 col-md-6">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        <a href="{% url 'listing' listing.id %}" style="color: white">{{ listing.title }}</a>
+                        {{ listing.listing_title }}
                     </div>
                     <div class="panel-body">
-                        <a href="{% url 'listing' listing.id %}">
-                            <img src="{{ listing.image_link }}" class="img-responsive" style="width:100%" alt="{{ listing.title }}">
-                        </a>
+
+                        <img src="{{ listing.image_link }}" class="img-responsive" style="width:100%" alt="{{ listing.listing_title }}">
+
                     </div>
                     <div class="panel-footer">
-                        <strong>Price:</strong> $ {{ listing.price }}
+                        <strong>Winning Price: </strong>$ {{ listing.winning_price }}
                     </div>
                     <div class="panel-footer">
-                        <strong>Created </strong>{{ listing.orig_date }}
+                        <strong>Winner: </strong>{{ listing.winner_username }}
+                    </div>
+                    <div class="panel-footer">
+                        <strong>Won at: </strong>{{ listing.winning_date }}
                     </div>
                 </div>
         </div>
         {% empty %}
         <ul>
-            <li>No active auctions</li>
+            <li>No closed auctions</li>
         </ul>
         {% endfor %}
     </div>
