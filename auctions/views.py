@@ -22,6 +22,13 @@ def index(request):
     })
 
 
+def closed_auctions(request):
+
+    return render(request, "auctions/index.html", {
+        "listings": ClosedAuctions.objects.all()
+    })
+
+
 @login_required(login_url="login")
 def listing(request, listing_id):
 
@@ -61,6 +68,7 @@ def listing(request, listing_id):
                 new_bid = Bid(user=current_user.id, title=item.title, listing_id=listing_id,
                               bid=user_bid)
                 new_bid.save()
+                auction_winner = current_user
             else:
                 message = "Your bid should be at least as large as the starting bid"
 
@@ -149,7 +157,7 @@ def close_auction(request, listing_id):
     current_user = request.user
     # nu merge pt ca eu cand dau close sunt current user si trebuie sa vad cine a licitat maxim
     closed_item = ClosedAuctions(winner_id=auction_winner.id, listing_title=item.title,
-                                 winner_username=current_user.username, winning_price=winning_bid['bid__max'],
+                                 winner_username=auction_winner.username, winning_price=winning_bid['bid__max'],
                                  image_link=item.image_link)
     closed_item.save()
     AuctionListing.objects.filter(pk=listing_id).delete()
