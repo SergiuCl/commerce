@@ -1,0 +1,70 @@
+{% extends "auctions/layout.html" %}
+{% block head %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+{% endblock %}
+
+
+{% block body %}
+
+{% if message %}
+<ul>
+    <li>{{ message }}</li>
+</ul>
+{% endif %}
+
+<form action="" method="post">
+    {% csrf_token %}
+
+    <select name="category" class="form-control mb-4" aria-label="Default select example">
+        {% if selected_category %}
+            <option selected>{{ selected_category }}</option>
+        {% else %}
+            <option selected>Select category</option>
+        {% endif %}
+        {% for category in categories %}
+            <option value="{{ category }}">{{ category }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <button class="btn btn-info btn-block my-4" type="submit">Submit</button>
+</form>
+<hr>
+
+
+{% if listings %}
+    <div class="container">
+        <div class="row">
+            {% for listing in listings %}
+            <div class="col-sm-4 col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <a href="{% url 'listing' listing.id %}" style="color: white">{{ listing.title }}</a>
+                    </div>
+                    <div class="panel-body">
+                        <a href="{% url 'listing' listing.id %}">
+                            <img src="{{ listing.image_link }}" class="img-responsive" style="width:100%" alt="{{ listing.title }}">
+                        </a>
+                    </div>
+                    <div class="panel-footer">
+                        <strong>Price:</strong> $ {{ listing.price }}
+                    </div>
+                    <div class="panel-footer">
+                        <strong>Created </strong>{{ listing.orig_date }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <ul>
+                <li>No active auctions</li>
+            </ul>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+<br>
+
+
+{% endblock %}
