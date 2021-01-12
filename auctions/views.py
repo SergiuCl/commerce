@@ -23,6 +23,7 @@ def index(request):
 
 
 def closed_auctions(request):
+
     # display all the closed auctions
     return render(request, "auctions/closedAuctions.html", {
         "listings": ClosedAuctions.objects.all()
@@ -31,6 +32,7 @@ def closed_auctions(request):
 
 @login_required(login_url="login")
 def user_winnings(request):
+
     # display all the closed auctions for the current user
     current_user = request.user
     return render(request, "auctions/myWinnings.html", {
@@ -41,12 +43,14 @@ def user_winnings(request):
 @login_required(login_url="login")
 def listing(request, listing_id):
 
+    # declare some variables to use in get and post method
     other_bids = False
     number_of_bids = 0
     user_has_max = False
     user_is_owner = False
     listing_comments = []
-    # insert the info from form into the db
+
+    # insert the info from form user into the db
     if request.method == "POST":
         global auction_winner
         item = AuctionListing.objects.get(pk=listing_id)
@@ -55,6 +59,7 @@ def listing(request, listing_id):
         other_users_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
         user_bid = float(request.POST['placeBid'])
         message = None
+
         # make sure bid is greater then others
         if other_users_bid['bid__max'] is not None:
             # set other bids to true in order to print the number of bids on the page
@@ -155,6 +160,7 @@ def comment(request, listing_id):
 
 @login_required(login_url="login")
 def add_to_watchlist(request, listing_id):
+
     # check if item already in list
     current_user = request.user
     check_item = Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id)
@@ -170,6 +176,7 @@ def add_to_watchlist(request, listing_id):
 
 @login_required(login_url="login")
 def remove_from_watchlist(request, listing_id):
+
     # check if item already in list
     current_user = request.user
     check_item = Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id)
@@ -183,6 +190,8 @@ def remove_from_watchlist(request, listing_id):
 
 @login_required(login_url="login")
 def close_auction(request, listing_id):
+
+    # when owner clicks the button close the auction
     item = AuctionListing.objects.get(pk=listing_id)
     winning_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
     current_user = request.user
@@ -200,6 +209,7 @@ def close_auction(request, listing_id):
 
 @login_required(login_url="login")
 def user_watchlist(request):
+
     current_user = request.user
     # get the watchlist items for the current user
     user_w_items = Watchlist.objects.filter(user_id=current_user.id)
@@ -219,6 +229,7 @@ def user_watchlist(request):
 
 @login_required(login_url="login")
 def create_listing(request):
+
     if request.method == "POST":
 
         # get the info from user
@@ -261,11 +272,10 @@ def create_listing(request):
 
 def categories(request):
 
+    # display the items filtered by category
     if request.method == "POST":
         if request.POST['category']:
-            print(request.POST['category'])
             selected_category = Category.objects.get(category=request.POST['category'])
-            print(selected_category)
             category_items = AuctionListing.objects.filter(categories=selected_category)
 
         categories_list = Category.objects.all()
@@ -284,6 +294,7 @@ def categories(request):
 
 
 def login_view(request):
+
     if request.method == "POST":
 
         # Attempt to sign user in
@@ -304,11 +315,13 @@ def login_view(request):
 
 
 def logout_view(request):
+
     logout(request)
     return HttpResponseRedirect(reverse("index"))
 
 
 def register(request):
+
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
