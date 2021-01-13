@@ -70,7 +70,7 @@
 <hr>
 {% if user_is_owner %}
 <a href="{% url 'closeAuction' listing.id %}">
-    <button type="button" class="btn btn-warning">Close Auction</button>
+    <button type="button" class="btn btn-warning" {{ disabled }}>Close Auction</button>
 </a>
 {% endif %}
 <hr>

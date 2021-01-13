@@ -111,6 +111,7 @@ def listing(request, listing_id):
             "comments": listing_comments
         })
     else:
+        disabled = ""
         # if method is get
         current_user = request.user
         # get the item
@@ -126,6 +127,10 @@ def listing(request, listing_id):
         # if items not None, set other_bids to true
         if other_users_bid['bid__max'] is not None:
             other_bids = True
+        else:
+            # set disabled to true in order to set the close button inactive if no bids
+            disabled = "disabled"
+
         # check if user owns the auction
         if item.owner == current_user:
             user_is_owner = True
@@ -140,7 +145,8 @@ def listing(request, listing_id):
             "user_has_max": user_has_max,
             "user_is_owner": user_is_owner,
             "current_bid": other_users_bid['bid__max'],
-            "comments": listing_comments
+            "comments": listing_comments,
+            "disabled": disabled
         })
 
 
@@ -252,22 +258,17 @@ def create_listing(request):
                 "message": "Please provide a price."
             })
 
-        # create a new object of type AuctionListing
-        auction = AuctionListing()
-        # add data to object
-        auction.owner = request.user
-        auction.title = auction_title
-        auction.description = request.POST["description"]
-        auction.price = auction_price
-
         if request.POST["image"]:
-            auction.image_link = request.POST["image"]
+            image_link = request.POST["image"]
         else:
-            auction.image_link = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/No_image_3x4.svg/1200px-No_image_3x4.svg.png"
+            image_link = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/No_image_3x4.svg/1200px-No_image_3x4.svg.png"
 
-        auction.categories = Category.objects.get(pk=int(request.POST["categories"]))
+        category = Category.objects.get(pk=int(request.POST["categories"]))
 
-        auction.last_update = datetime.datetime.now()
+        # create a new object of type AuctionListing
+        auction = AuctionListing(owner=request.user, title=auction_title,
+                                 description=request.POST["description"], price=auction_price,
+                                 image_link=image_link, categories=category, last_update=datetime.datetime.now())
         auction.save()
         return HttpResponseRedirect(reverse('index'))
 
