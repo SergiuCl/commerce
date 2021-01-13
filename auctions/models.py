@@ -33,8 +33,7 @@ class Watchlist(models.Model):
 
 
 class ClosedAuctions(models.Model):
-    winner_id = models.IntegerField(null=True)
-    winner_username = models.CharField(max_length=30, default=None)
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, default=None, related_name="winner")
     listing_title = models.CharField(max_length=30, default=None)
     winning_price = models.IntegerField(null=True)
     image_link = models.CharField(max_length=64, default=None, blank=True, null=True)

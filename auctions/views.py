@@ -36,7 +36,7 @@ def user_winnings(request):
     # display all the closed auctions for the current user
     current_user = request.user
     return render(request, "auctions/myWinnings.html", {
-        "listings": ClosedAuctions.objects.filter(winner_id=current_user.id)
+        "listings": ClosedAuctions.objects.filter(winner=current_user)
     })
 
 
@@ -213,20 +213,24 @@ def remove_from_watchlist(request, listing_id):
 @login_required(login_url="login")
 def close_auction(request, listing_id):
 
-    # when owner clicks the button close the auction
-    item = AuctionListing.objects.get(pk=listing_id)
-    winning_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
     current_user = request.user
+    item = AuctionListing.objects.get(pk=listing_id)
 
-    closed_item = ClosedAuctions(winner_id=auction_winner.id, listing_title=item.title,
-                                 winner_username=auction_winner.username, winning_price=winning_bid['bid__max'],
-                                 image_link=item.image_link)
-    closed_item.save()
-    AuctionListing.objects.filter(pk=listing_id).delete()
-    Bid.objects.filter(listing_id=listing_id).delete()
-    Watchlist.objects.filter(listing_id=listing_id).delete()
-    Comment.objects.filter(listing_id=listing_id).delete()
-    return HttpResponseRedirect(reverse('index'))
+    # make sure there is a winner
+    if auction_winner is not None:
+        # make sure current user is owner
+        if current_user == item.owner:
+            # when owner clicks the button close the auction
+            winning_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
+
+            closed_item = ClosedAuctions(winner=auction_winner, listing_title=item.title,
+                                         winning_price=winning_bid['bid__max'], image_link=item.image_link)
+            closed_item.save()
+            AuctionListing.objects.filter(pk=listing_id).delete()
+            Bid.objects.filter(listing_id=listing_id).delete()
+            Watchlist.objects.filter(auction=item).delete()
+            Comment.objects.filter(listing_id=listing_id).delete()
+            return HttpResponseRedirect(reverse('index'))
 
 
 @login_required(login_url="login")
