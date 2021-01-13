@@ -56,7 +56,7 @@ def listing(request, listing_id):
         item = AuctionListing.objects.get(pk=listing_id)
         current_user = request.user
         in_watchlist = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
-        other_users_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
+        other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
         user_bid = float(request.POST['placeBid'])
         message = None
 
@@ -67,7 +67,7 @@ def listing(request, listing_id):
             if user_bid > other_users_bid['bid__max']:
                 user_has_max = True
                 # add the item to the object
-                new_bid = Bid(user=current_user.id, title=item.title, listing_id=listing_id,
+                new_bid = Bid(user_bid=current_user, auction_bid=item,
                               bid=user_bid)
                 new_bid.save()
                 auction_winner = current_user
@@ -79,8 +79,7 @@ def listing(request, listing_id):
                 # set other bids to true in order to print the number of bids on the page
                 other_bids = True
                 # add the bid to the object
-                new_bid = Bid(user=current_user.id, title=item.title, listing_id=listing_id,
-                              bid=user_bid)
+                new_bid = Bid(user_bid=current_user, auction_bid=item, bid=user_bid)
                 new_bid.save()
                 auction_winner = current_user
             else:
@@ -88,12 +87,12 @@ def listing(request, listing_id):
 
         # count the number of total bids for current item
         number_of_bids = Bid.objects.all().aggregate(
-            count=Count('bid', filter=Q(listing_id=listing_id))
+            count=Count('bid', filter=Q(auction_bid=item))
         )
         # check if user owns the auction
         if item.owner == current_user:
             user_is_owner = True
-        other_users_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
+        other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
 
         # get the comments for the current listing
         listing_comments = Comment.objects.filter(listing_id=listing_id)
@@ -120,7 +119,7 @@ def listing(request, listing_id):
         in_watchlist = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
         # count the number of bids for the current item
         number_of_bids = Bid.objects.all().aggregate(
-            count=Count('bid', filter=Q(listing_id=listing_id))
+            count=Count('bid', filter=Q(auction_bid=item))
         )
         # get the max bid
         other_users_bid = Bid.objects.all().aggregate(Max('bid'))
@@ -227,13 +226,13 @@ def close_auction(request, listing_id):
         # make sure current user is owner
         if current_user == item.owner:
             # when owner clicks the button close the auction
-            winning_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
+            winning_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
 
             closed_item = ClosedAuctions(winner=auction_winner, listing_title=item.title,
                                          winning_price=winning_bid['bid__max'], image_link=item.image_link)
             closed_item.save()
             AuctionListing.objects.filter(pk=listing_id).delete()
-            Bid.objects.filter(listing_id=listing_id).delete()
+            Bid.objects.filter(auction_bid=item).delete()
             Watchlist.objects.filter(auction=item).delete()
             Comment.objects.filter(listing_id=listing_id).delete()
             return HttpResponseRedirect(reverse('index'))

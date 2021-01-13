@@ -41,9 +41,8 @@ class ClosedAuctions(models.Model):
 
 
 class Bid(models.Model):
-    user = models.IntegerField(null=True)
-    title = models.CharField(max_length=64)
-    listing_id = models.IntegerField(null=True)
+    user_bid = models.ForeignKey(User, on_delete=models.CASCADE, default=None, related_name="user_bid")
+    auction_bid = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, default=None, related_name="auction_bid")
     bid = models.IntegerField()
 
 
