@@ -28,8 +28,8 @@ class AuctionListing(models.Model):
 
 
 class Watchlist(models.Model):
-    user_id = models.IntegerField(null=True)
-    listing_id = models.IntegerField(null=True)
+    auction = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, default=None, related_name="auction")
+    user_watchlist = models.ForeignKey(User, on_delete=models.CASCADE, default=None, related_name="user_watchlist")
 
 
 class ClosedAuctions(models.Model):

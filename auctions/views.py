@@ -55,7 +55,7 @@ def listing(request, listing_id):
         global auction_winner
         item = AuctionListing.objects.get(pk=listing_id)
         current_user = request.user
-        in_watchlist = Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id)
+        in_watchlist = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
         other_users_bid = Bid.objects.filter(listing_id=listing_id).aggregate(Max('bid'))
         user_bid = float(request.POST['placeBid'])
         message = None
@@ -116,7 +116,7 @@ def listing(request, listing_id):
         # get the item
         item = AuctionListing.objects.get(pk=listing_id)
         # check if item in watchlist to be able to display the correct watchlist button
-        in_watchlist = Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id)
+        in_watchlist = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
         # count the number of bids for the current item
         number_of_bids = Bid.objects.all().aggregate(
             count=Count('bid', filter=Q(listing_id=listing_id))
@@ -159,16 +159,37 @@ def comment(request, listing_id):
 
 
 @login_required(login_url="login")
+def user_watchlist(request):
+
+    current_user = request.user
+    # get the watchlist items for the current user
+    user_w_items = Watchlist.objects.filter(user_watchlist=current_user)
+    watchlist_items = []
+
+    # make sure query is not None
+    if user_w_items:
+        # for each item in user items get the Auction Listing and append it to the array
+        for o in user_w_items:
+            temp = AuctionListing.objects.get(pk=o.auction.id)
+            watchlist_items.append(temp)
+
+    return render(request, "auctions/watchlist.html", {
+        "watchlist_items": watchlist_items,
+    })
+
+
+@login_required(login_url="login")
 def add_to_watchlist(request, listing_id):
 
     # check if item already in list
     current_user = request.user
-    check_item = Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id)
+    item = AuctionListing.objects.get(pk=listing_id)
+    check_item = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
 
     # if item not in the watchlist, add it
     if not check_item:
         # create a new object of type Watchlist
-        watchlist_item = Watchlist(user_id=current_user.id, listing_id=listing_id)
+        watchlist_item = Watchlist(user_watchlist=current_user, auction=item)
         watchlist_item.save()
 
     return HttpResponseRedirect(reverse('listing', args=(listing_id,)))
@@ -179,11 +200,12 @@ def remove_from_watchlist(request, listing_id):
 
     # check if item already in list
     current_user = request.user
-    check_item = Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id)
+    item = AuctionListing.objects.get(pk=listing_id)
+    check_item = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
 
     # if item in the list, delete it
     if check_item:
-        Watchlist.objects.filter(listing_id=listing_id).filter(user_id=current_user.id).delete()
+        Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user).delete()
 
     return HttpResponseRedirect(reverse('listing', args=(listing_id,)))
 
@@ -205,26 +227,6 @@ def close_auction(request, listing_id):
     Watchlist.objects.filter(listing_id=listing_id).delete()
     Comment.objects.filter(listing_id=listing_id).delete()
     return HttpResponseRedirect(reverse('index'))
-
-
-@login_required(login_url="login")
-def user_watchlist(request):
-
-    current_user = request.user
-    # get the watchlist items for the current user
-    user_w_items = Watchlist.objects.filter(user_id=current_user.id)
-    watchlist_items = []
-
-    # make sure query is not None
-    if user_w_items:
-        # for each item in user items get the Auction Listing and append it to the array
-        for o in user_w_items:
-            temp = AuctionListing.objects.get(pk=o.listing_id)
-            watchlist_items.append(temp)
-
-    return render(request, "auctions/watchlist.html", {
-        "watchlist_items": watchlist_items,
-    })
 
 
 @login_required(login_url="login")
