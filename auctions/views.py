@@ -60,7 +60,7 @@ def listing(request, listing_id):
         user_bid = float(request.POST['placeBid'])
         message = None
 
-        # make sure bid is greater then others
+        # make sure bid is greater than others
         if other_users_bid['bid__max'] is not None:
             # set other bids to true in order to print the number of bids on the page
             other_bids = True
@@ -72,9 +72,9 @@ def listing(request, listing_id):
                 new_bid.save()
                 auction_winner = current_user
             else:
-                message = "Your bid should be greater then the other"
+                message = "Your bid should be greater than the other"
         else:
-            # make sure user bid is greater then the item price
+            # make sure user bid is greater than the item price
             if user_bid >= item.price:
                 # set other bids to true in order to print the number of bids on the page
                 other_bids = True
@@ -93,7 +93,7 @@ def listing(request, listing_id):
         if item.owner == current_user:
             user_is_owner = True
         other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
-
+        print(other_users_bid)
         # get the comments for the current listing
         listing_comments = Comment.objects.filter(listing_id=listing_id)
 
@@ -122,7 +122,7 @@ def listing(request, listing_id):
             count=Count('bid', filter=Q(auction_bid=item))
         )
         # get the max bid
-        other_users_bid = Bid.objects.all().aggregate(Max('bid'))
+        other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
         # if items not None, set other_bids to true
         if other_users_bid['bid__max'] is not None:
             other_bids = True
