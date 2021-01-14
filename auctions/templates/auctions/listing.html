@@ -84,7 +84,7 @@
 <hr>
 
 {% for comment in comments %}
-    <h3>User: {{ comment.username }}</h3>
+    <h3>User: {{ comment.user_comment.username }}</h3>
     <p>Comment: {{ comment.comment }}</p>
     <p>Date: {{ comment.date }}</p>
 <hr>

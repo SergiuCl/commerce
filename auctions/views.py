@@ -95,7 +95,7 @@ def listing(request, listing_id):
         other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
         print(other_users_bid)
         # get the comments for the current listing
-        listing_comments = Comment.objects.filter(listing_id=listing_id)
+        listing_comments = Comment.objects.filter(auction_comment=item)
 
         return render(request, "auctions/listing.html", {
             "listing": item,
@@ -134,7 +134,7 @@ def listing(request, listing_id):
         if item.owner == current_user:
             user_is_owner = True
         # get the comments for the current listing
-        listing_comments = Comment.objects.filter(listing_id=listing_id)
+        listing_comments = Comment.objects.filter(auction_comment=item)
 
         return render(request, "auctions/listing.html", {
             "listing": item,
@@ -151,14 +151,13 @@ def listing(request, listing_id):
 
 def comment(request, listing_id):
 
+    item = AuctionListing.objects.get(pk=listing_id)
     user_comment = None
     current_user = request.user
     # check if any comments and save them in the db
     if request.POST["comment"]:
         user_comment = request.POST["comment"]
-        print(user_comment)
-        new_comment = Comment(user_id=current_user.id, username=current_user.username,
-                              listing_id=listing_id, comment=user_comment)
+        new_comment = Comment(user_comment=current_user, auction_comment=item, comment=user_comment)
         new_comment.save()
         return HttpResponseRedirect(reverse('listing', args=(listing_id,)))
 

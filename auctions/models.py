@@ -47,8 +47,7 @@ class Bid(models.Model):
 
 
 class Comment(models.Model):
-    user_id = models.IntegerField(null=True)
-    username = models.CharField(max_length=30, default=None)
-    listing_id = models.IntegerField(null=True)
+    user_comment = models.ForeignKey(User, on_delete=models.CASCADE, default=None, related_name="user_comment")
+    auction_comment = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, default=None, related_name="auction_comment")
     comment = models.CharField(max_length=100, default=None)
     date = models.DateTimeField(auto_now_add=True)
