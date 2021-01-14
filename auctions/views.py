@@ -76,6 +76,7 @@ def listing(request, listing_id):
         else:
             # make sure user bid is greater than the item price
             if user_bid >= item.price:
+                user_has_max = True
                 # set other bids to true in order to print the number of bids on the page
                 other_bids = True
                 # add the bid to the object
@@ -231,10 +232,9 @@ def close_auction(request, listing_id):
                                          winning_price=winning_bid['bid__max'], image_link=item.image_link)
             closed_item.save()
             AuctionListing.objects.filter(pk=listing_id).delete()
-            Bid.objects.filter(auction_bid=item).delete()
-            Watchlist.objects.filter(auction=item).delete()
-            Comment.objects.filter(listing_id=listing_id).delete()
             return HttpResponseRedirect(reverse('index'))
+    else:
+        pass
 
 
 @login_required(login_url="login")
