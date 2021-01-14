@@ -44,7 +44,7 @@ def user_winnings(request):
 @login_required(login_url="login")
 def listing(request, listing_id):
 
-    # declare some variables to use in get and post method
+    # declare some variables to use in get and post methods
     other_bids = False
     number_of_bids = 0
     user_has_max = False
@@ -240,7 +240,6 @@ def close_auction(request, listing_id):
             closed_item = ClosedAuctions(winner=auction_winner, won_auction=item,
                                          winning_price=winning_bid['bid__max'])
             closed_item.save()
-            #AuctionListing.objects.filter(pk=listing_id).delete()
             return HttpResponseRedirect(reverse('index'))
     else:
         pass
@@ -378,3 +377,4 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
