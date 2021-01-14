@@ -21,12 +21,12 @@
         <div class="col-sm-4 col-md-6">
                 <div class="panel panel-primary">
                     <div class="panel-heading">
-                        {{ listing.listing_title }}
+                        <a href="{% url 'closedAuction' listing.won_auction.id %}" style="color: white">{{ listing.won_auction.title }}</a>
                     </div>
                     <div class="panel-body">
-
-                        <img src="{{ listing.image_link }}" class="img-responsive" style="width:100%" alt="{{ listing.listing_title }}">
-
+                        <a href="{% url 'closedAuction' listing.won_auction.id %}">
+                            <img src="{{ listing.won_auction.image_link }}" class="img-responsive" style="width:100%" alt="{{ listing.won_auction.title }}">
+                        </a>
                     </div>
                     <div class="panel-footer">
                         <strong>Winning Price: </strong>$ {{ listing.winning_price }}

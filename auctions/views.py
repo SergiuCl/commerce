@@ -17,16 +17,17 @@ auction_winner = None
 
 def index(request):
 
+    # get the closed items
+    closed_items = ClosedAuctions.objects.all()
+    # get the auctions
+    auction_listings = AuctionListing.objects.all()
+    # get the id from every single closed item
+    id_to_exclude = [closed_item.won_auction.id for closed_item in closed_items]
+    # exclude the list of ids from auction_listings
+    active_items = auction_listings.exclude(pk__in=id_to_exclude)
+
     return render(request, "auctions/index.html", {
-        "listings": AuctionListing.objects.all()
-    })
-
-
-def closed_auctions(request):
-
-    # display all the closed auctions
-    return render(request, "auctions/closedAuctions.html", {
-        "listings": ClosedAuctions.objects.all()
+        "listings": active_items
     })
 
 
@@ -215,6 +216,14 @@ def remove_from_watchlist(request, listing_id):
     return HttpResponseRedirect(reverse('listing', args=(listing_id,)))
 
 
+def closed_auctions(request):
+
+    # display all the closed auctions
+    return render(request, "auctions/closedAuctions.html", {
+        "listings": ClosedAuctions.objects.all()
+    })
+
+
 @login_required(login_url="login")
 def close_auction(request, listing_id):
 
@@ -228,13 +237,26 @@ def close_auction(request, listing_id):
             # when owner clicks the button close the auction
             winning_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
 
-            closed_item = ClosedAuctions(winner=auction_winner, listing_title=item.title,
-                                         winning_price=winning_bid['bid__max'], image_link=item.image_link)
+            closed_item = ClosedAuctions(winner=auction_winner, won_auction=item,
+                                         winning_price=winning_bid['bid__max'])
             closed_item.save()
-            AuctionListing.objects.filter(pk=listing_id).delete()
+            #AuctionListing.objects.filter(pk=listing_id).delete()
             return HttpResponseRedirect(reverse('index'))
     else:
         pass
+
+
+@login_required(login_url="login")
+def closed_auction(request, listing_id):
+
+    # get the auction listing
+    item = AuctionListing.objects.get(pk=listing_id)
+    # get the closed item
+    closed_listing = ClosedAuctions.objects.get(won_auction=item)
+
+    return render(request, "auctions/closedAuction.html", {
+        "listing": closed_listing
+    })
 
 
 @login_required(login_url="login")
@@ -282,12 +304,17 @@ def categories(request):
         if request.POST['category']:
             selected_category = Category.objects.get(category=request.POST['category'])
             category_items = AuctionListing.objects.filter(categories=selected_category)
-
-        categories_list = Category.objects.all()
+            # get the closed items
+            closed_items = ClosedAuctions.objects.all()
+            # get the id from every single closed item
+            id_to_exclude = [closed_item.won_auction.id for closed_item in closed_items]
+            # exclude the list of ids from auction_listings
+            active_items = category_items.exclude(pk__in=id_to_exclude)
+            categories_list = Category.objects.all()
 
         return render(request, "auctions/categories.html", {
             "categories": categories_list,
-            "listings": category_items,
+            "listings": active_items,
             "selected_category": selected_category
         })
 
