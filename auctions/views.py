@@ -66,7 +66,7 @@ def listing(request, listing_id):
             value_error = True
 
         # make sure bid is greater than others
-        if other_users_bid is not None:
+        if other_users_bid['bid__max'] is not None:
             # set other bids to true in order to print the number of bids on the page
             other_bids = True
             if not value_error:
@@ -94,6 +94,8 @@ def listing(request, listing_id):
                     auction_winner = current_user
                 else:
                     message = "Your bid should be at least as large as the starting bid"
+            else:
+                message = "Please enter a valid bid"
 
         # count the number of total bids for current item
         number_of_bids = Bid.objects.all().aggregate(
