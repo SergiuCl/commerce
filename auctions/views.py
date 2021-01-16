@@ -82,17 +82,18 @@ def listing(request, listing_id):
             else:
                 message = "Please enter a valid bid"
         else:
-            # make sure user bid is greater than the item price
-            if user_bid >= item.price:
-                user_has_max = True
-                # set other bids to true in order to print the number of bids on the page
-                other_bids = True
-                # add the bid to the object
-                new_bid = Bid(user_bid=current_user, auction_bid=item, bid=user_bid)
-                new_bid.save()
-                auction_winner = current_user
-            else:
-                message = "Your bid should be at least as large as the starting bid"
+            if not value_error:
+                # make sure user bid is greater than the item price
+                if user_bid >= item.price:
+                    user_has_max = True
+                    # set other bids to true in order to print the number of bids on the page
+                    other_bids = True
+                    # add the bid to the object
+                    new_bid = Bid(user_bid=current_user, auction_bid=item, bid=user_bid)
+                    new_bid.save()
+                    auction_winner = current_user
+                else:
+                    message = "Your bid should be at least as large as the starting bid"
 
         # count the number of total bids for current item
         number_of_bids = Bid.objects.all().aggregate(
