@@ -11,7 +11,9 @@
 {% endif %}
 
 <div>
-    <h1>{{ listing.won_auction.title }}</h1>
+    <h1>{{ listing.won_auction.title }} - Auction closed</h1>
+    <hr>
+    <h2>Winner: {{ listing.winner.username }}</h2>
     <hr>
     <img src="{{ listing.won_auction.image_link }}" alt="{{ listing.won_auction.title }}" style="width: 300px;">
     <br> <br>
