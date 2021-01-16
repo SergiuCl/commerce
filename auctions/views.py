@@ -50,7 +50,7 @@ def listing(request, listing_id):
     user_has_max = False
     user_is_owner = False
     listing_comments = []
-
+    value_error = False
     # insert the info from form user into the db
     if request.method == "POST":
         global auction_winner
@@ -58,22 +58,29 @@ def listing(request, listing_id):
         current_user = request.user
         in_watchlist = Watchlist.objects.filter(auction=item).filter(user_watchlist=current_user)
         other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
-        user_bid = float(request.POST['placeBid'])
         message = None
+        user_bid = None
+        try:
+            user_bid = float(request.POST['placeBid'])
+        except ValueError:
+            value_error = True
 
         # make sure bid is greater than others
-        if other_users_bid['bid__max'] is not None:
+        if other_users_bid is not None:
             # set other bids to true in order to print the number of bids on the page
             other_bids = True
-            if user_bid > other_users_bid['bid__max']:
-                user_has_max = True
-                # add the item to the object
-                new_bid = Bid(user_bid=current_user, auction_bid=item,
-                              bid=user_bid)
-                new_bid.save()
-                auction_winner = current_user
+            if not value_error:
+                if user_bid > other_users_bid['bid__max']:
+                    user_has_max = True
+                    # add the item to the object
+                    new_bid = Bid(user_bid=current_user, auction_bid=item,
+                                  bid=user_bid)
+                    new_bid.save()
+                    auction_winner = current_user
+                else:
+                    message = "Your bid should be greater than the other"
             else:
-                message = "Your bid should be greater than the other"
+                message = "Please enter a valid bid"
         else:
             # make sure user bid is greater than the item price
             if user_bid >= item.price:
@@ -95,7 +102,6 @@ def listing(request, listing_id):
         if item.owner == current_user:
             user_is_owner = True
         other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
-        print(other_users_bid)
         # get the comments for the current listing
         listing_comments = Comment.objects.filter(auction_comment=item)
 
