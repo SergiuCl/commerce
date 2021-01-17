@@ -52,6 +52,7 @@ def listing(request, listing_id):
     listing_comments = []
     value_error = False
     user_has_last_bid = False
+
     # insert the info from form user into the db
     if request.method == "POST":
         global auction_winner
