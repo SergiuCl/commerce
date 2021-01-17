@@ -56,7 +56,7 @@
 
 <form action="{% url 'listing' listing.id %}" method="post">
     {% csrf_token %}
-    {% if user_is_owner %}
+    {% if user_is_owner or user_has_last_bid %}
         <div class="form-group">
             <input autofocus class="form-control" type="text" name="placeBid" placeholder="Bid" disabled>
         </div>
@@ -94,6 +94,5 @@
     <li>No comments yet</li>
 </ul>
 {% endfor %}
-
 {% endblock %}
 

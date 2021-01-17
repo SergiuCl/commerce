@@ -51,6 +51,7 @@ def listing(request, listing_id):
     user_is_owner = False
     listing_comments = []
     value_error = False
+    user_has_last_bid = False
     # insert the info from form user into the db
     if request.method == "POST":
         global auction_winner
@@ -77,6 +78,7 @@ def listing(request, listing_id):
                                   bid=user_bid)
                     new_bid.save()
                     auction_winner = current_user
+                    user_has_last_bid = True
                 else:
                     message = "Your bid should be greater than the other"
             else:
@@ -92,6 +94,7 @@ def listing(request, listing_id):
                     new_bid = Bid(user_bid=current_user, auction_bid=item, bid=user_bid)
                     new_bid.save()
                     auction_winner = current_user
+                    user_has_last_bid = True
                 else:
                     message = "Your bid should be at least as large as the starting bid"
             else:
@@ -118,7 +121,8 @@ def listing(request, listing_id):
             "user_has_max": user_has_max,
             "user_is_owner": user_is_owner,
             "current_bid": other_users_bid['bid__max'],
-            "comments": listing_comments
+            "comments": listing_comments,
+            "user_has_last_bid": user_has_last_bid
         })
     else:
         disabled = ""
@@ -134,6 +138,7 @@ def listing(request, listing_id):
         )
         # get the max bid
         other_users_bid = Bid.objects.filter(auction_bid=item).aggregate(Max('bid'))
+
         # if items not None, set other_bids to true
         if other_users_bid['bid__max'] is not None:
             other_bids = True
@@ -156,7 +161,8 @@ def listing(request, listing_id):
             "user_is_owner": user_is_owner,
             "current_bid": other_users_bid['bid__max'],
             "comments": listing_comments,
-            "disabled": disabled
+            "disabled": disabled,
+            "user_has_last_bid": user_has_last_bid
         })
 
 
@@ -251,7 +257,7 @@ def close_auction(request, listing_id):
             closed_item.save()
             return HttpResponseRedirect(reverse('index'))
     else:
-        pass
+        return HttpResponseRedirect(reverse('index'))
 
 
 @login_required(login_url="login")
